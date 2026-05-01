@@ -35,7 +35,7 @@
       go mod tidy
       CGO_ENABLED=0 go build -o /app/catalogue .
       chown -R appuser:appuser /app
-      chmod o-rwx /app -
+      chmod o-rwx /app -R
    - name: execute mysql script
      ansible.builtin.shell: |
       mysql -h mysql-dev.devaimlops.online -u root -pRoboShop@1 < /app/catalogue/db/schema.sql
