@@ -26,6 +26,7 @@
      ansible.builtin.unarchive:
       src: /tmp/catalogue.zip
       dest: /app
+      remote_src: yes
    - name: execute mysql scripts
      ansible.builtin.shell: |
       mysql -h mysql-dev.devaimlops.online -u root -pRoboShop@1 < /tmp/catalogue/db/schema.sql
