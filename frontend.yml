@@ -14,7 +14,7 @@
     - name: setup nodejs repo and install nodejs
       ansible.builtin.shell: 
         curl -fsSL https://rpm.nodesource.com/setup_20.x | bash - && dnf install -y nodejs
-    - name: download frontend zip
+    - name: download frontend source code
       ansible.builtin.get_url:
         url: https://raw.githubusercontent.com/raghudevopsb89/roboshop-microservices/main/artifacts/frontend.zip
         dest: /tmp/frontend.zip
