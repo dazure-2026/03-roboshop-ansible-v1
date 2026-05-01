@@ -18,7 +18,7 @@
      ansible.builtin.file:
       path: /app
       state: absent
-   - name: create app directory to extract the source code
+   - name: create app directory to extract the src code
      ansible.builtin.file:
       path: /app
       state: directory
