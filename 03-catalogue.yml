@@ -27,7 +27,7 @@
       src: /tmp/catalogue.zip
       dest: /app
       remote_src: yes
-   - name: execute mysql scripts
+   - name: execute mysql script
      ansible.builtin.shell: |
       mysql -h mysql-dev.devaimlops.online -u root -pRoboShop@1 < /app/catalogue/db/schema.sql
       mysql -h mysql-dev.devaimlops.online -u root -pRoboShop@1 < /app/catalogue/db/app-user.sql
