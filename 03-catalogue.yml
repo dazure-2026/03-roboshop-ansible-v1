@@ -28,7 +28,11 @@
       dest: /app
       remote_src: yes
    - name: create appuser
-     ansible.builtin.shell: useradd -r -s /bin/false appuser
+     ansible.builtin.user:
+      name: appuser
+      shell: /bin/false
+      system: yes
+      state: present
    - name: install npm dependencies and build the application
      ansible.builtin.shell: |
       cd /app
