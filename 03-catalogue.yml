@@ -29,9 +29,9 @@
       remote_src: yes
    - name: execute mysql scripts
      ansible.builtin.shell: |
-      mysql -h mysql-dev.devaimlops.online -u root -pRoboShop@1 < /tmp/catalogue/db/schema.sql
-      mysql -h mysql-dev.devaimlops.online -u root -pRoboShop@1 < /tmp/catalogue/db/app-user.sql
-      mysql -h mysql-dev.devaimlops.online -u root -pRoboShop@1 catalogue < /tmp/catalogue/db/master-data.sql 
+      mysql -h mysql-dev.devaimlops.online -u root -pRoboShop@1 < /app/catalogue/db/schema.sql
+      mysql -h mysql-dev.devaimlops.online -u root -pRoboShop@1 < /app/catalogue/db/app-user.sql
+      mysql -h mysql-dev.devaimlops.online -u root -pRoboShop@1 catalogue < /app/catalogue/db/master-data.sql 
    - name: create appuser
      ansible.builtin.shell: useradd -r -s /bin/false appuser
    - name: install npm dependencies and build the application
