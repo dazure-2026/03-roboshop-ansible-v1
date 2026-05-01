@@ -42,9 +42,9 @@
       chmod o-rwx /app -R
    - name: execute mysql script
      ansible.builtin.shell: |
-      mysql -h mysql-dev.devaimlops.online -u root -pRoboShop@1 < /app/catalogue/db/schema.sql
-      mysql -h mysql-dev.devaimlops.online -u root -pRoboShop@1 < /app/catalogue/db/app-user.sql
-      mysql -h mysql-dev.devaimlops.online -u root -pRoboShop@1 catalogue < /app/catalogue/db/master-data.sql 
+      mysql -h mysql-dev.devaimlops.online -u root -pRoboShop@1 < /app/db/schema.sql
+      mysql -h mysql-dev.devaimlops.online -u root -pRoboShop@1 < /app/db/app-user.sql
+      mysql -h mysql-dev.devaimlops.online -u root -pRoboShop@1 catalogue < /app/db/master-data.sql 
    - name: create systemd service file
      ansible.builtin.copy:
       dest: /etc/systemd/system/catalogue.service
