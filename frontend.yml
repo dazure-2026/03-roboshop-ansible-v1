@@ -1,0 +1,57 @@
+- name: setup frontend
+  hosts: all
+  become: yes
+  tasks:
+    - name: install nginx
+      ansible.builtin.dnf:
+        name: nginx
+        state: present
+    - name: copy nginx config file
+      ansible.builtin.copy:
+        src: nginx.conf
+        dest: /etc/nginx/nginx.conf
+    #  Install Node.js for the frontend application and version 20.x is used as an example, you can change it to the version you need   
+    - name: setup nodejs repo and install nodejs
+      ansible.builtin.shell: 
+        curl -fsSL https://rpm.nodesource.com/setup_20.x | bash - && dnf install -y nodejs
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/raghudevopsb89/roboshop-microservices/main/artifacts/frontend.zip
+        dest: /tmp/frontend.zip
+    - name: remove existing frontend directory
+      ansible.builtin.file:
+        path: /tmp/frontend
+        state: absent
+    - name: create frontend directory
+      ansible.builtin.file:
+        path: /tmp/frontend
+        state: directory
+    - name: unzip frontend zip
+      ansible.builtin.unarchive:
+        src: /tmp/frontend.zip
+        dest: /tmp/frontend
+        remote_src: yes
+    - name: install npm dependencies
+      ansible.builtin.command: npm install
+      args:
+        chdir: /tmp/frontend
+    - name: build frontend
+      ansible.builtin.command: npm run build
+      args:
+        chdir: /tmp/frontend
+    - name: clean nginx html directory
+      ansible.builtin.shell: rm -rf /usr/share/nginx/html/*
+    - name: copy built frontend to nginx
+      ansible.builtin.copy:
+        src: /tmp/frontend/out/
+        dest: /usr/share/nginx/html/
+        remote_src: yes
+    - name: test nginx configuration
+      ansible.builtin.command: nginx -t
+    - name: restart nginx
+      ansible.builtin.systemd:
+        name: nginx
+        state: restarted
+    - name: enable nginx
+      ansible.builtin.systemd:
+        name: nginx
+        enabled: yes
