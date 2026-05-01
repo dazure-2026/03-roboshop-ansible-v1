@@ -6,6 +6,12 @@
       ansible.builtin.dnf:
         name: mysql8.4-server
         state: present
+
+    - name: Start MySQL Server
+      ansible.builtin.systemd_service:
+        name: mysqld
+        state: started
+        enabled: yes
     
     - name: create root password
       ansible.builtin.shell: |
