@@ -21,7 +21,7 @@
         state: directory
     - name: download app source code
       ansible.builtin.get_url:
-        url: curl -L -o /tmp/user.zip https://raw.githubusercontent.com/raghudevopsb89/roboshop-microservices/main/artifacts/user.zip
+        url: https://raw.githubusercontent.com/raghudevopsb89/roboshop-microservices/main/artifacts/user.zip
         dest: /tmp/user.zip
     - name: unarchive the source code to app directory
       ansible.builtin.unarchive:
