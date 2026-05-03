@@ -9,13 +9,8 @@
           [mongodb-org-7.0]
           name=MongoDB Repository
           baseurl=https://repo.mongodb.org/yum/redhat/9/mongodb-org/7.0/x86_64/
-          gpgcheck=1
-          gpgkey=https://www.mongodb.org/static/pgp/server-7.0.asc
+          gpgcheck=0
           enabled=1
-    - name: import mongodb gpg key
-      ansible.builtin.rpm_key:
-        key: https://www.mongodb.org/static/pgp/server-7.0.asc
-        state: present
     - name: install mongodb server
       ansible.builtin.dnf:
         name: mongodb-org
