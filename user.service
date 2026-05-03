@@ -14,6 +14,7 @@ SyslogIdentifier=user
 Environment=MONGO_URL=mongodb://mongodb-dev.devaimlops.online:27017/users
 Environment=JWT_SECRET=roboshop-secret-key
 Environment=PORT=8001
+Environment=HOST=0.0.0.0
 
 [Install]
 WantedBy=multi-user.target
