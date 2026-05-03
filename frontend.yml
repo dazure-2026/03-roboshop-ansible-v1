@@ -2,6 +2,47 @@
   hosts: all
   become: yes
   tasks:
+    - name: stop nginx service if present
+      ansible.builtin.systemd:
+        name: nginx
+        state: stopped
+        enabled: no
+      ignore_errors: yes
+    - name: remove nginx package if installed
+      ansible.builtin.dnf:
+        name: nginx
+        state: absent
+    - name: remove nodejs package if installed
+      ansible.builtin.dnf:
+        name: nodejs
+        state: absent
+    - name: remove nginx config file
+      ansible.builtin.file:
+        path: /etc/nginx/nginx.conf
+        state: absent
+    - name: remove nginx service unit file
+      ansible.builtin.file:
+        path: /etc/systemd/system/nginx.service
+        state: absent
+    - name: remove nginx config directory
+      ansible.builtin.file:
+        path: /etc/nginx
+        state: absent
+    - name: remove nginx html directory
+      ansible.builtin.file:
+        path: /usr/share/nginx/html
+        state: absent
+    - name: remove frontend directory
+      ansible.builtin.file:
+        path: /tmp/frontend
+        state: absent
+    - name: remove frontend zip
+      ansible.builtin.file:
+        path: /tmp/frontend.zip
+        state: absent
+    - name: reload systemd daemon after cleanup
+      ansible.builtin.systemd:
+        daemon_reload: yes
     - name: install nginx
       ansible.builtin.dnf:
         name: nginx
