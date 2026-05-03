@@ -35,6 +35,15 @@
         npm run build
         chown -R appuser:appuser /app
         chmod o-rwx /app -R
+    - name: check if user service file exists
+      ansible.builtin.stat:
+        path: /etc/systemd/system/user.service
+      register: user_service_file
+    - name: remove existing user service file
+      ansible.builtin.file:
+        path: /etc/systemd/system/user.service
+        state: absent
+      when: user_service_file.stat.exists
     - name: copy user service file
       ansible.builtin.copy:
         dest: /etc/systemd/system/user.service
