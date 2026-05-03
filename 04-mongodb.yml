@@ -23,7 +23,7 @@
     - name: configure mongodb to listen on all interfaces
       ansible.builtin.lineinfile:
         path: /etc/mongod.conf
-        regexp: '^bindIp:'
+        regexp: '^\s*bindIp:'
         line: '  bindIp: 0.0.0.0'
     - name: restart mongodb service to apply changes
       ansible.builtin.systemd_service:
