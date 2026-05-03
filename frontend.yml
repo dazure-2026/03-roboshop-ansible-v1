@@ -2,11 +2,14 @@
   hosts: all
   become: yes
   tasks:
+    - name: gather service facts
+      ansible.builtin.service_facts:
     - name: stop nginx service if present
       ansible.builtin.systemd:
         name: nginx
         state: stopped
         enabled: no
+      when: "'nginx.service' in ansible_facts.services"
       ignore_errors: yes
     - name: remove nginx package if installed
       ansible.builtin.dnf:

@@ -14,10 +14,24 @@
         enabled: yes
     
     - name: create root password
-      ansible.builtin.shell: |
-        mysql -u root -e "
-          CREATE USER 'root'@'%' IDENTIFIED BY 'RoboShop@1';
-          GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
-          ALTER USER 'root'@'localhost' IDENTIFIED BY 'RoboShop@1';
-          FLUSH PRIVILEGES;
-          "
+      block:
+        - name: try setting root password without existing password
+          ansible.builtin.shell: |
+            mysql -u root -e "
+              ALTER USER 'root'@'localhost' IDENTIFIED BY 'RoboShop@1';
+              CREATE USER 'root'@'%' IDENTIFIED BY 'RoboShop@1';
+              GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
+              FLUSH PRIVILEGES;
+              "
+        - name: set fact for root password
+          ansible.builtin.set_fact:
+            mysql_root_password: "RoboShop@1"
+      rescue:
+        - name: root password already exists, verify connectivity
+          ansible.builtin.shell: |
+            mysql -u root -pRoboShop@1 -e "SELECT 1;"
+          register: mysql_test
+          ignore_errors: yes
+        - name: show password already set message
+          ansible.builtin.debug:
+            msg: "MySQL root password appears to be already set, skipping configuration"
