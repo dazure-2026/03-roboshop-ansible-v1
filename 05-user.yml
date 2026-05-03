@@ -32,7 +32,6 @@
       ansible.builtin.shell: |
         cd /app
         npm install 
-        npm run build
         chown -R appuser:appuser /app
         chmod o-rwx /app -R
     - name: check if user service file exists
