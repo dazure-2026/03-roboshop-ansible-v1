@@ -1,0 +1,34 @@
+- name: mongodb setup
+  hosts: all
+  become: yes
+  tasks:
+    - name: add mongodb repo file
+      ansible.builtin.copy:
+        dest: /etc/yum.repos.d/mongodb-org-7.0.repo
+        content: |
+          [mongodb-org-7.0]
+          name=MongoDB Repository
+          baseurl=https://repo.mongodb.org/yum/redhat/9/mongodb-org/7.0/x86_64/
+          gpgcheck=1
+          gpgkey=https://www.mongodb.org/static/pgp/server-7.0.asc
+          enabled=1
+    - name: install mongodb server
+      ansible.builtin.dnf:
+        name: mongodb-org
+        state: present
+    - name: start mongodb service
+      ansible.builtin.systemd_service:
+        name: mongod
+        state: started
+        enabled: yes
+    - name: configure mongodb to listen on all interfaces
+      ansible.builtin.lineinfile:
+        path: /etc/mongod.conf
+        regexp: '^bindIp:'
+        line: '  bindIp: 0.0.0.0'
+    - name: restart mongodb service to apply changes
+      ansible.builtin.systemd_service:
+        name: mongod
+        state: restarted
+        enabled: yes
+

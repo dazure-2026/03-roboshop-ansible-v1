@@ -1,0 +1,49 @@
+- name: user setup
+  hosts: all
+  become: yes
+  tasks:
+    - name: install nodejs 
+      ansible.builtin.shell: 
+        curl -fsSL https://rpm.nodesource.com/setup_20.x | bash - && dnf install -y nodejs
+    - name: create appuser
+      ansible.builtin.user:
+        name: appuser
+        shell: /bin/false
+        system: yes
+        state: present
+    - name: remove existing app directory
+      ansible.builtin.file:
+        path: /app
+        state: absent
+    - name: create app directory if not exists
+      ansible.builtin.file:
+        path: /app
+        state: directory
+    - name: download app source code
+      ansible.builtin.get_url:
+        url: curl -L -o /tmp/user.zip https://raw.githubusercontent.com/raghudevopsb89/roboshop-microservices/main/artifacts/user.zip
+        dest: /tmp/user.zip
+    - name: unarchive the source code to app directory
+      ansible.builtin.unarchive:
+        src: /tmp/user.zip
+        dest: /app
+        remote_src: yes
+    - name: install npm dependencies and build the application
+      ansible.builtin.shell: |
+        cd /app
+        npm install 
+        npm run build
+        chown -R appuser:appuser /app
+        chmod o-rwx /app -R
+    - name: copy user service file
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/user.service
+        src: user.service
+    - name: daemon reload systemd
+      ansible.builtin.systemd:
+        daemon_reload: yes
+    - name: start user service
+      ansible.builtin.systemd:
+        name: user
+        state: restarted
+        enabled: yes
