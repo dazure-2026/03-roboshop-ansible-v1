@@ -1,0 +1,27 @@
+- name: valkey setup
+  hosts: all
+  become: yes
+  tasks:
+    - name: install valkey
+      ansible.builtin.dnf:
+        name: valkey
+        state: present
+    - name: start valkey service
+      ansible.builtin.systemd_service:
+        name: valkey
+        state: started
+        enabled: yes
+    - name: ensure valkey config binds to all interfaces
+      ansible.builtin.replace:
+        path: /etc/valkey/valkey.conf
+        regexp: '^\s*bind\s+127\.0\.0\.1'
+        replace: 'bind 0.0.0.0'
+    - name: disable valkey protected mode for remote access
+      ansible.builtin.replace:
+        path: /etc/valkey/valkey.conf
+        regexp: '^\s*protected-mode\s+yes'
+        replace: 'protected-mode no'
+    - name: restart valkey service to apply configuration
+      ansible.builtin.systemd_service:
+        name: valkey
+        state: restarted
