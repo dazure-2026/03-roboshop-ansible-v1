@@ -45,6 +45,15 @@
       mysql -h mysql-dev.devaimlops.online -u root -pRoboShop@1 < /app/db/schema.sql
       mysql -h mysql-dev.devaimlops.online -u root -pRoboShop@1 < /app/db/app-user.sql
       mysql -h mysql-dev.devaimlops.online -u root -pRoboShop@1 catalogue < /app/db/master-data.sql 
+   - name: check if systemd service file exists
+     ansible.builtin.stat:
+      path: /etc/systemd/system/catalogue.service
+     register: service_file
+   - name: remove existing systemd service file
+     ansible.builtin.file:
+      path: /etc/systemd/system/catalogue.service
+      state: absent
+     when: service_file.stat.exists
    - name: create systemd service file
      ansible.builtin.copy:
       dest: /etc/systemd/system/catalogue.service
