@@ -1,0 +1,63 @@
+- name: notification setup
+  hosts: all
+  become: yes
+  tasks:
+    - name: install notification server
+      ansible.builtin.dnf:
+        name: 
+         - python3
+         - python3-pip
+        state: present
+    - name: add application user
+      ansible.builtin.user:
+        name: appuser
+        shell: /bin/false
+        system: yes
+        state: present
+    - name: remove existing app directory
+      ansible.builtin.file:
+        path: /app
+        state: absent
+    - name: create app directory if not exists
+      ansible.builtin.file:
+        path: /app
+        state: directory
+        owner: appuser
+        group: appuser
+        mode: '0755'
+    - name: download app source code
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/raghudevopsb89/roboshop-microservices/main/artifacts/notification.zip
+        dest: /tmp/notification.zip
+    - name: unarchive the source code to app directory
+      ansible.builtin.unarchive:
+        src: /tmp/notification.zip
+        dest: /app
+        remote_src: yes 
+    - name: install python dependencies
+      ansible.builtin.shell: |
+        pip3 install -r /app/requirements.txt
+        chown -R appuser:appuser /app
+        chmod o-rwx /app -R
+    - name: check if notification service file exists
+      ansible.builtin.stat:
+        path: /etc/systemd/system/notification.service
+      register: notification_service_file
+    - name: remove existing notification service file
+      ansible.builtin.file: 
+        path: /etc/systemd/system/notification.service
+        state: absent 
+      when: notification_service_file.stat.exists
+    - name: copy notification service file
+      ansible.builtin.copy: 
+        dest: /etc/systemd/system/notification.service
+        src: notification.service
+    - name: daemon reload systemd
+      ansible.builtin.systemd_service:
+        daemon_reload: yes
+    - name: start notification service
+      ansible.builtin.systemd_service:
+        name: notification
+        state: restarted
+        enabled: yes
+          

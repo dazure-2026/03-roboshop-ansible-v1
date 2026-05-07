@@ -1,0 +1,57 @@
+- name: orders setup
+  hosts: all
+  become: yes
+  tasks:
+    - name: install java 21
+      ansible.builtin.dnf:
+        name: 
+          - java-21-openjdk 
+          - java-21-openjdk-devel 
+          - maven
+        state: present 
+    - name: download orders source code
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/raghudevopsb89/roboshop-microservices/main/artifacts/orders.zip
+        dest: /tmp/orders.zip
+    - name: remove existing app directory
+      ansible.builtin.file:
+        path: /app
+        state: absent
+    - name: create app directory if not exists
+      ansible.builtin.file:
+        path: /app
+        state: directory
+    - name: unarchive the source code to app directory
+      ansible.builtin.unarchive:
+        src: /tmp/orders.zip
+        dest: /app
+        remote_src: yes
+    - name: build the application
+      ansible.builtin.shell: |
+        cd /app
+        mvn clean package -DskipTests
+        cp target/orders.jar /app/orders.jar  
+        chown -R appuser:appuser /app
+        chmod o-rwx /app -R
+    - name: check if orders service file exists
+      ansible.builtin.stat:
+        path: /etc/systemd/system/orders.service
+      register: orders_service_file
+    - name: remove existing orders service file
+      ansible.builtin.file:
+        path: /etc/systemd/system/orders.service
+        state: absent
+      when: orders_service_file.stat.exists
+    - name: copy orders service file
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/orders.service
+        src: orders.service
+    - name: daemon reload systemd
+      ansible.builtin.systemd_service:
+        daemon_reload: yes
+    - name: start orders service
+      ansible.builtin.systemd_service:
+        name: orders
+        state: restarted
+        enabled: yes
+        

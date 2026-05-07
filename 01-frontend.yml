@@ -27,10 +27,6 @@
       ansible.builtin.file:
         path: /etc/systemd/system/nginx.service
         state: absent
-    - name: remove nginx config directory
-      ansible.builtin.file:
-        path: /etc/nginx
-        state: absent
     - name: remove nginx html directory
       ansible.builtin.file:
         path: /usr/share/nginx/html
@@ -50,11 +46,6 @@
       ansible.builtin.dnf:
         name: nginx
         state: present
-    - name: ensure nginx config directory exists
-      ansible.builtin.file:
-        path: /etc/nginx
-        state: directory
-        mode: '0755'
     - name: copy nginx config file
       ansible.builtin.copy:
         src: nginx.conf

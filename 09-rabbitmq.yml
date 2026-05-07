@@ -1,0 +1,63 @@
+- name: rabitmq setup
+  hosts: all
+  become: yes
+  tasks:
+    - name: config rabbitmq repository
+      ansible.builtin.copy:
+        dest: /etc/yum.repos.d/rabbitmq_erlang.repo
+        content: |
+          [rabbitmq-erlang]
+          name=rabbitmq-erlang
+          baseurl=https://packagecloud.io/rabbitmq/erlang/el/9/$basearch
+          gpgcheck=0
+          enabled=1 
+    - name: install erlang
+      ansible.builtin.dnf:
+        name: erlang
+        state: present
+    - name: config rabbitmq repository
+      ansible.builtin.copy:
+        dest: /etc/yum.repos.d/rabbitmq_rabbitmq-server.repo
+        content: |
+          [rabbitmq_rabbitmq-server]
+          name=rabbitmq_rabbitmq-server
+          baseurl=https://packagecloud.io/rabbitmq/rabbitmq-server/el/9/$basearch
+          gpgcheck=0
+          enabled=1
+    - name: install rabbitmq server
+      ansible.builtin.dnf:
+        name: rabbitmq-server
+        state: present
+    - name: start rabbitmq service
+      ansible.builtin.systemd_service:
+        name: rabbitmq-server
+        state: started
+        enabled: yes
+    - name: check if rabbitmq management plugin is enabled
+      ansible.builtin.shell: rabbitmq-plugins list -E | grep rabbitmq_management
+      register: rabbitmq_management_enabled
+      ignore_errors: yes
+    - name: enable rabbitmq management plugin
+      ansible.builtin.shell: rabbitmq-plugins enable rabbitmq_management
+      when: rabbitmq_management_enabled.rc != 0
+    - name: restart rabbitmq service to apply plugin changes
+      ansible.builtin.systemd_service:
+        name: rabbitmq-server
+        state: restarted
+        enabled: yes
+    - name: check if rabbitmq user exists
+      ansible.builtin.shell: rabbitmqctl list_users | awk '{print $1}' | grep -w '^roboshop$'
+      register: rabbitmq_user_exists
+      ignore_errors: yes
+    - name: create rabbitmq user
+      ansible.builtin.shell: rabbitmqctl add_user roboshop RoboShop@1
+      when: rabbitmq_user_exists.rc != 0
+    - name: set rabbitmq user tags
+      ansible.builtin.shell: rabbitmqctl set_user_tags roboshop administrator
+    - name: set rabbitmq user permissions
+      ansible.builtin.shell: rabbitmqctl set_permissions -p / roboshop ".*" ".*" ".*"
+    - name: restart rabbitmq service to apply user changes
+      ansible.builtin.systemd_service:
+        name: rabbitmq-server
+        state: restarted
+        enabled: yes
